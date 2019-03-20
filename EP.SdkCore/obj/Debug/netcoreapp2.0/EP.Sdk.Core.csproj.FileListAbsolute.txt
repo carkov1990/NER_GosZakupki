@@ -1,0 +1,9 @@
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\bin\Debug\netcoreapp2.0\EP.Sdk.Core.deps.json
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\bin\Debug\netcoreapp2.0\EP.Sdk.Core.dll
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\bin\Debug\netcoreapp2.0\EP.Sdk.Core.pdb
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\obj\Debug\netcoreapp2.0\EP.Sdk.Core.csprojAssemblyReference.cache
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\obj\Debug\netcoreapp2.0\EP.Sdk.Core.csproj.CoreCompileInputs.cache
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\obj\Debug\netcoreapp2.0\EP.Sdk.Core.AssemblyInfoInputs.cache
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\obj\Debug\netcoreapp2.0\EP.Sdk.Core.AssemblyInfo.cs
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\obj\Debug\netcoreapp2.0\EP.Sdk.Core.dll
+C:\Users\1\Desktop\PULLENTY\EP.SdkCore\obj\Debug\netcoreapp2.0\EP.Sdk.Core.pdb

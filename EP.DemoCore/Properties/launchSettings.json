@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EP.Demo.Core": {
+      "commandName": "Project",
+      "commandLineArgs": "txt"
+    }
+  }
+}
