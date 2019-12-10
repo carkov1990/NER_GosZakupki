@@ -150,9 +150,13 @@ namespace Demo
 							.Where(x => x.Ogrn != participant.Ogrn || x.Inn != participant.Inn).ToList();
 						using (var sqlConnection =
 							new SqlConnection(
-								@"Server=DB_DL; Database=GosZakupki; Integrated Security=SSPI; MultipleActiveResultSets=True;")
+								@"Server=DB_DL; Database=GosZakupki_new; Integrated Security=SSPI; MultipleActiveResultSets=True;")
 						)
 						{
+                            if (otherParticipants.Count == 0)
+                            {
+                                continue;
+                            }
 							sqlConnection.Open();
 							var command = new SqlCommand($@"
 														SELECT COUNT(1)  from Contract c with(nolock)
@@ -160,7 +164,8 @@ namespace Demo
 														where c.IsLastVersion = 1 AND CustomerInn = '{participant.Inn}' and (s.Inn IN ({string.Join(',', otherParticipants.Select(x => "'" + x.Inn + "'"))}) 
 														or s.Ogrn in ({string.Join(',', otherParticipants.Select(x => "'" + x.Ogrn + "'"))}))
 													", sqlConnection);
-							var reader = command.ExecuteReader();
+                            Console.WriteLine(command.CommandText);
+                            var reader = command.ExecuteReader();
 							reader.Read();
 							var count = (int) reader[0];
 							if (count == 0)
@@ -175,7 +180,8 @@ namespace Demo
 														where c.IsLastVersion = 1 AND CustomerInn = '{participant.Inn}' and (s.Inn IN ({string.Join(',', otherParticipants.Select(x => "'" + x.Inn + "'"))}) 
 														or s.Ogrn in ({string.Join(',', otherParticipants.Select(x => "'" + x.Ogrn + "'"))}))
 													", sqlConnection);
-								reader = command.ExecuteReader();
+                                Console.WriteLine(command.CommandText);
+                                reader = command.ExecuteReader();
 								reader.Read();
 								contractId.Add((reader[0], reader[1], reader[2], reader[3], reader[4]));
 							}
@@ -190,7 +196,8 @@ namespace Demo
 														or c.Number in ({string.Join(',', referent.Contracts.Select(a => '\'' + a.Number + '\''))})
 														or c.RegNumber in ({string.Join(',', referent.Contracts.Select(a => '\'' + a.Number + '\''))}))
 													", sqlConnection);
-								reader = command.ExecuteReader();
+                                Console.WriteLine(command.CommandText);
+                                reader = command.ExecuteReader();
 								reader.Read();
 								count = (int) reader[0];
 								if (count > 0)
@@ -204,6 +211,7 @@ namespace Demo
 														or c.Number in ({string.Join(',', referent.Contracts.Select(a => '\'' + a.Number + '\''))})
 														or c.RegNumber in ({string.Join(',', referent.Contracts.Select(a => '\'' + a.Number + '\''))}))
 													", sqlConnection);
+                                    Console.WriteLine(command.CommandText);
 									reader = command.ExecuteReader();
 									while (reader.Read())
 									{
