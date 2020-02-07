@@ -6,7 +6,7 @@ namespace EP.Demo.Core
 	{
 		public bool Equals(Participant x, Participant y)
 		{
-			return x.Inn == y.Inn && x.Ogrn == y.Ogrn;
+			return x.Inn.Equals(y.Inn) && x.Ogrn.Equals(y.Ogrn);
 		}
 
 		public int GetHashCode(Participant obj)

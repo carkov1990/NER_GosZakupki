@@ -9,6 +9,7 @@ using EP.Ner.Core;
 using EP.Ner.Date;
 using EP.Ner.Org;
 using EP.Ner.Uri;
+using PravoRu.Common.Extensions;
 using PravoRu.DataLake.Arbitr.Common.CaseNumbers;
 
 namespace EP.Demo.Core
@@ -72,6 +73,41 @@ namespace EP.Demo.Core
 			ProcessorService.RegisterAnalyzer(new MyAnalyzer());
 		}
 
+		private Participant RecognizeParticipant(string text, int startOccurance, int endOccurance, OrganizationReferent organizationReferent)
+		{
+			var participant = new Participant
+			{
+				Name = organizationReferent.ToString()
+			};
+			var str = text.Substring(endOccurance,
+				text.Length - endOccurance > 200
+					? 200
+					: (text.Length - endOccurance));
+			var uriAnalysisResult = _uriProcessor.Process(new SourceOfAnalysis(str));
+			if (uriAnalysisResult.Entities?.Count > 0)
+			{
+				participant.Inn = uriAnalysisResult.Entities.OfType<UriReferent>()
+					.FirstOrDefault(x => x.Scheme == "ИНН")?.Value;
+				participant.Ogrn = uriAnalysisResult.Entities.OfType<UriReferent>()
+					.FirstOrDefault(x => x.Scheme == "ОГРН")?.Value;
+			}
+			else
+			{
+				str = text.Substring(startOccurance < 200 ? 0 : startOccurance - 200,
+					200);
+				uriAnalysisResult = _uriProcessor.Process(new SourceOfAnalysis(str));
+				if (uriAnalysisResult.Entities?.Count > 0)
+				{
+					participant.Inn = uriAnalysisResult.Entities.OfType<UriReferent>()
+						.FirstOrDefault(x => x.Scheme == "ИНН")?.Value;
+					participant.Ogrn = uriAnalysisResult.Entities.OfType<UriReferent>()
+						.FirstOrDefault(x => x.Scheme == "ОГРН")?.Value;
+				}
+			}
+
+			return participant;
+		}
+
 		//
 		// Summary:
 		//     Основная функция выделения объектов
@@ -92,37 +128,59 @@ namespace EP.Demo.Core
 				//Ищем участников
 				foreach (var organizationReferent in analysisResult.Entities.OfType<OrganizationReferent>().Where(x=>!x.ToString().ToUpper().Contains(" СУД ")))
 				{
+					var participant = new Participant()
+					{
+						Name = organizationReferent.ToString()
+					};
 					if (String.IsNullOrWhiteSpace(organizationReferent.INN) ||
 					    String.IsNullOrWhiteSpace(organizationReferent.OGRN))
 					{
 						foreach (var occurance in organizationReferent.Occurrence)
 						{
-							var str = kit.Sofa.Text.Substring(occurance.EndChar,
-								kit.Sofa.Text.Length - occurance.EndChar > 100
-									? 100
-									: (kit.Sofa.Text.Length - occurance.EndChar));
-							var uriAnalysisResult = _uriProcessor.Process(new SourceOfAnalysis(str));
-							if (uriAnalysisResult.Entities?.Count > 0)
+							var tempParticipant = RecognizeParticipant(kit.Sofa.Text, occurance.BeginChar, occurance.EndChar,
+								organizationReferent);
+							if (!tempParticipant.Inn.NullOrEmpty() && participant.Inn.NullOrEmpty())
 							{
-								var participant = new Participant();
-								participant.Inn = uriAnalysisResult.Entities.OfType<UriReferent>()
-									.FirstOrDefault(x => x.Scheme == "ИНН")?.Value;
-								participant.Ogrn = uriAnalysisResult.Entities.OfType<UriReferent>()
-									.FirstOrDefault(x => x.Scheme == "ОГРН")?.Value;
-								participant.Name = organizationReferent.ToString();
-								organizationReferents.Add(participant);
-								break;
+								participant.Inn = tempParticipant.Inn;
+							}
+							
+							if (!tempParticipant.Ogrn.NullOrEmpty() && participant.Ogrn.NullOrEmpty())
+							{
+								participant.Ogrn = tempParticipant.Ogrn;
 							}
 						}
 					}
 					else
 					{
-						var participant = new Participant();
-						participant.Inn = organizationReferent.INN;
-						participant.Ogrn = organizationReferent.OGRN;
-						participant.Name = organizationReferent.ToString();
-						organizationReferents.Add(participant);
+						participant = new Participant
+						{
+							Inn = organizationReferent.INN,
+							Ogrn = organizationReferent.OGRN,
+							Name = organizationReferent.ToString()
+						};
 					}
+					
+					//Полученный участник может быть с такими же реквизатами, но с иным названием. Добавляем участника без реквизитов
+					if (!organizationReferents.Any(x => x.Name.Equals(participant.Name)))
+					{
+						try
+						{
+							if (!participant.Inn.NullOrEmpty() && organizationReferents.Any(x => participant.Inn.Equals(x.Inn)))
+							{
+								participant.Inn = null;
+							}
+							if (!participant.Ogrn.NullOrEmpty() && organizationReferents.Any(x => participant.Ogrn.Equals(x.Ogrn)))
+							{
+								participant.Ogrn = null;
+							}
+						}
+						catch (Exception e)
+						{
+							Console.WriteLine(e);
+							throw;
+						}
+					}
+					organizationReferents.Add(participant);
 				}
 
 				//Участники 
