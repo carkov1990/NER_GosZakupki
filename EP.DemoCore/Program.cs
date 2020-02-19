@@ -85,20 +85,23 @@ namespace Demo
 									continue;
 								}
 
-								// создаём экземпляр обычного процессора
-								using (Processor proc = ProcessorService.CreateSpecificProcessor(nameof(MyAnalyzer)))
-								{
-									// анализируем текст
-									ar = proc.Process(new SourceOfAnalysis(response.HtmlText));
-									try
-									{
-										PostExecute(ar);
-									}
-									catch (Exception e)
-									{
-										Console.WriteLine(e);
-									}
-								}
+
+                                File.WriteAllText(Path.Combine("Results", "Original_" + GlobalState.File), response.HtmlText);
+
+                                // создаём экземпляр обычного процессора
+                                using (Processor proc = ProcessorService.CreateSpecificProcessor(nameof(MyAnalyzer)))
+                                {
+                                    // анализируем текст
+                                    ar = proc.Process(new SourceOfAnalysis(response.HtmlText));
+                                    try
+                                    {
+                                        PostExecute(ar);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Console.WriteLine(e);
+                                    }
+                                }
 
 								Console.WriteLine("Обработан файл " + GlobalState.File);
 								line = sr.ReadLine();

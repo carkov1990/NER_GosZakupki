@@ -265,7 +265,10 @@ namespace EP.Demo.Core
 				}
 
 				contractNumbers = contractNumbers.Distinct().ToList();
-
+                contracts.AddRange(contractNumbers.Select(x => new Contract() {
+                    Number = x,
+                    Dates = new List<DateTime?>()
+                }));
 				//Просто вычленяем все номера
 				var resultNumbers = ExtractionNumbers(kit.FirstToken);
 
